@@ -9,7 +9,7 @@ use yii\web\IdentityInterface;
  * This is the model class for table "user".
  *
  * @property integer $id
- * @property string $username
+ * @property string $name
  * @property string $email
  * @property string $password
  * @property integer $isAdmin
@@ -34,10 +34,9 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return [
             [['isAdmin'], 'integer'],
-            [['username', 'email', 'password', 'photo'], 'string', 'max' => 255],
+            [['name', 'email', 'password', 'photo'], 'string', 'max' => 255],
         ];
     }
-
 
     /**
      * @inheritdoc
@@ -46,7 +45,7 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
     {
         return [
             'id' => 'ID',
-            'username' => 'Name',
+            'name' => 'Name',
             'email' => 'Email',
             'password' => 'Password',
             'isAdmin' => 'Is Admin',
@@ -101,7 +100,21 @@ class User extends \yii\db\ActiveRecord implements IdentityInterface
         return $this->save(false);
     }
 
+    public function saveFromVk($uid, $name, $photo)
+    {
+        $user = User::findOne($uid);
+        if($user)
+        {
+            return Yii::$app->user->login($user);
+        }
 
+        $this->id = $uid;
+        $this->name = $name;
+        $this->photo = $photo;
+        $this->create();
+
+        return Yii::$app->user->login($this);
+    }
 
     public function getImage()
     {
